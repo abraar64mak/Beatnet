@@ -1,0 +1,12 @@
+# Example configuration (illustrative values taken from the BeatNet product manual)
+lead_selection: II
+fallback_lead: I
+
+window_seconds: 30
+stride_seconds: 5
+
+thresholds:        # per-class confidence thresholds
+  PVC: 0.45
+  LBBB: 0.55
+  AFib: 0.50
+  Normal: 0.60

@@ -26,7 +26,11 @@ BeatNet closes that gap: a modular, deployable software stack that is accurate e
 
 An interactive dashboard lets you pick a patient, adjust the decision threshold, and view the full 30 s waveform, PQRST overlay, ground truth, heart rate and per-class probabilities side by side.
 
+![BeatNet dashboard](docs/assets/dashboard.png)
+
 ## Architecture
+
+Details: [`docs/architecture.md`](docs/architecture.md)
 
 ```mermaid
 flowchart TD
@@ -73,7 +77,7 @@ Measured in acceptance testing against sponsor-defined criteria (10 tests, T-01 
 | Sinus rhythm AUROC | 0.985 | — |
 | Infarction AUROC | 0.832 (Lead II) / 0.730 (Lead I) | ≥ 0.90 ❌ |
 
-Per-class numbers (AUROC, AUPRC, accuracy, recall, precision, F1, specificity, NPV) for Lead I and Lead II are in the full report.
+Full per-class numbers for Lead I and Lead II are in [`docs/results.md`](docs/results.md).
 
 ### Fiducial delineation (LUDB / QTDB)
 
@@ -138,7 +142,7 @@ cd fairseq-signals && pip install -e . && cd ..
 python run_beatnet.py --input ecg.dat --lead II
 ```
 
-Configuration (lead selection, window/stride, per-class thresholds) is documented in the project manuals. Example:
+Configuration (lead selection, window/stride, per-class thresholds) is documented in [`docs/user_guide.md`](docs/user_guide.md); see also [`configs/example_config.yaml`](configs/example_config.yaml). Example:
 
 ```yaml
 lead_selection: II
@@ -149,20 +153,51 @@ thresholds: { PVC: 0.45, LBBB: 0.55, AFib: 0.50, Normal: 0.60 }
 
 > Model checkpoints and the MIMIC-IV-ECG dataset are not included in this repository (PhysioNet credentialed access / data-use agreement required).
 
-## Planned repository layout
+## What was built (high level)
+
+**Data & preprocessing**
+- Signal validation, resampling to 500 Hz, 0.5–40 Hz band-pass, z-score normalization
+- 5 s / 30 s overlapping window segmentation, patient-level train/val/test splits
+- Single-lead → 12-channel wrapper for foundation-model compatibility
+
+**Disease classification**
+- ECG-FM (CNN + Transformer) fine-tuned for 17 labels on MIMIC-IV-ECG using fairseq-signals
+- Per-window inference, mean aggregation, per-class tunable thresholds, plausibility rules
+
+**Waveform delineation**
+- Custom 1-D U-Net + dilated TCN trained on LUDB/QTDB with Gaussian heatmap targets
+- Peak extraction, window merging, spacing/beat-order post-processing, heart-rate estimation
+
+**Explainability**
+- Attention and gradient saliency maps; PQRST overlays
+
+**Integration & deployment**
+- Unified inference API and CLI, interactive dashboard, real-time device demo mode
+- Docker packaging, HiPerGator SLURM training jobs, Azure-hosted demo
+
+**Validation & documentation**
+- Unit → integration → system → acceptance testing (T-01…T-10), reproducibility runs
+- Four-volume Final Design Review (design, product/process, acceptance results, product manuals)
+
+## Repository structure
 
 ```
-preprocessing/    signal cleanup & tensor preparation
-classification/   ECG-FM model logic
-delineation/      PQRST U-Net + post-processing
-interpretability/ saliency generation
-inference/        unified runtime pipeline
-tests/            validation scripts
-scripts/          SLURM / Docker / evaluation helpers
-docs/             manuals
+Beatnet/
+├── README.md                  ← you are here
+├── docs/
+│   ├── architecture.md        system design, subsystems, interfaces
+│   ├── results.md             acceptance tests, per-class metrics, case studies, limitations
+│   ├── user_guide.md          environment, install, configure, run, troubleshoot
+│   ├── developer_guide.md     adding labels, retraining, extending saliency, testing, licensing
+│   └── assets/                figures: architecture, preprocessing, post-processing, dashboard, cases
+├── configs/
+│   └── example_config.yaml    example lead / window / threshold settings
+├── index.html                 project web page
+├── model_operations.html      model operations pipeline page
+└── references.html            quick-reference card
 ```
 
-This repository currently holds the project's supporting web pages (`index.html`, `model_operations.html`, `references.html`).
+> The production source code (preprocessing, classification, delineation, inference) and model weights were developed in the sponsor-facing project environment and are not part of this showcase repository. The documentation above describes their design and results.
 
 ## Future work
 
