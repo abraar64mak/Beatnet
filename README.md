@@ -215,9 +215,9 @@ If commercialized as a clinical decision-support product, BeatNet would likely f
 
 | Name | Program |
 |---|---|
-| Varun Sai Vemuri | M.S. Artificial Intelligence Systems, UF |
-| Arul Sathya Rajasrinivasan | M.S. Artificial Intelligence Systems, UF |
 | **Mohammed Abraar Khan** | M.S. Artificial Intelligence Systems, UF |
+| Arul Sathya Rajasrinivasan | M.S. Artificial Intelligence Systems, UF |
+| Varun Sai Vemuri | M.S. Artificial Intelligence Systems, UF |
 | Prithvi Halagere Lokesha | M.S. Artificial Intelligence Systems, UF |
 | Tzuchieh (Jeremy) Chao | M.S. Applied Data Science, UF |
 | Divyansh Agarwal | M.S. Applied Data Science, UF |
